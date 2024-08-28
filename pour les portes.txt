@@ -1,0 +1,4 @@
+pour les portes:
+cases portes fermée et ouverte
+quand on fait espace face à une porte fermée ça remplace la case
+portes animées
