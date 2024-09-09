@@ -163,28 +163,33 @@ void *ennemie(void *arg)
     t_enm *ennemies;
     t_en *en;
 	int i;
-
     ennemies = (t_enm *)arg;
     en = malloc(sizeof(t_en));
 	en->erreur = 1;
 	while (en->erreur == 1)
 	{
+		pthread_mutex_lock(&ennemies->cube->mutex_enemies);
 		i = where_go(en, ennemies);
+		pthread_mutex_unlock(&ennemies->cube->mutex_enemies);
 		usleep(400000);
 	}
 	while (i > -1)
 	{
+		pthread_mutex_lock(&ennemies->cube->mutex_enemies);
 		if (ennemies->cube->pos_x != ennemies->pos_player_x || ennemies->cube->pos_y != ennemies->pos_player_y)
 		{
 			en->erreur = 1;
 			while (en->erreur == 1)
 			{
 				i = where_go(en, ennemies);
+				pthread_mutex_unlock(&ennemies->cube->mutex_enemies);
 				usleep(5000);
+				pthread_mutex_lock(&ennemies->cube->mutex_enemies);
 			}
 			ennemies->pos_player_x = ennemies->cube->pos_x;
 			ennemies->pos_player_y = ennemies->cube->pos_y;
 		}
+		pthread_mutex_unlock(&ennemies->cube->mutex_enemies);
     	if (en->path[i] == 'H')
     	    make_move_en(ennemies->cube, 0, 1, ennemies->nbr);
     	else if (en->path[i] == 'B')
@@ -198,12 +203,10 @@ void *ennemie(void *arg)
 			printf("dead\n");
 			break;
 		}*/
-		//usleep(500000);
 		i--;
 	}
 	printf("dead\n");
     free(en);
-
     return NULL;
 }
 
@@ -254,29 +257,42 @@ void	make_move_en(t_cube *cube, int dir, double moveSpeed, int nb)
 	double	newpos_x;
 	double	newpos_y;
 	int		i;
+	int position_occupée;
 
 	i = 0;
+	pthread_mutex_lock(&cube->mutex_enemies);
 	newpos_x = calcul_newposx_en(dir, cube, moveSpeed, nb);
 	newpos_y = calcul_newposy_en(dir, cube, moveSpeed, nb);
-	
-	while (cube->ennemies[i])
-	{
-		if (i == nb)
-			i++;
-		if (!cube->ennemies[i])
-			return ;
-		while(cube->ennemies[i]->pos_x == newpos_x && cube->ennemies[i]->pos_y == newpos_y)
-			usleep(6000);
-		i++;
-	}
-	if (cube->map[(int)(cube->ennemies[nb]->pos_y)][(int)(newpos_x)] != '1'
+	while (1)
+    {
+		i = 0;
+		position_occupée = 0;
+        while (cube->ennemies[i])
+        {
+            if (i != nb && cube->ennemies[i]->pos_x == newpos_x && cube->ennemies[i]->pos_y == newpos_y)
+            {
+                position_occupée = 1;
+                break;
+            }
+            i++;
+        }
+        if (position_occupée != 1)
+            break;
+        pthread_mutex_unlock(&cube->mutex_enemies);
+        usleep(6000);
+        pthread_mutex_lock(&cube->mutex_enemies);
+    }
+	/*if (cube->map[(int)(cube->ennemies[nb]->pos_y)][(int)(newpos_x)] != '1'
 		&& cube->map[(int)(cube->ennemies[nb]->pos_y)][(int)(newpos_x)] != 'C')
 		cube->ennemies[nb]->pos_x = newpos_x;
 	if (cube->map[(int)(newpos_y)][(int)(cube->ennemies[nb]->pos_x)] != '1'
 		&& cube->map[(int)(newpos_y)][(int)(cube->ennemies[nb]->pos_x)] != 'C')
 		cube->ennemies[nb]->pos_y = newpos_y;
 	else
-		printf("problem\n");
+		printf("problem\n");*/
+	cube->ennemies[nb]->pos_x = newpos_x;
+	cube->ennemies[nb]->pos_y = newpos_y;
+	pthread_mutex_unlock(&cube->mutex_enemies);
 	usleep(400000);
 }
 

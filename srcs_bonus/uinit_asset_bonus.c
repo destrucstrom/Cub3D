@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/05 16:02:08 by marvin            #+#    #+#             */
-/*   Updated: 2024/08/23 11:56:40 by marvin           ###   ########.fr       */
+/*   Updated: 2024/09/09 11:30:18 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,7 @@ void	init_ennemies(t_cube *cube)
 
 	i = 0;
 	en = 0;
+	pthread_mutex_init(&cube->mutex_enemies, NULL);
 	cube->ennemies = malloc((cube->nb_ennemy + 1) * sizeof(t_enm *));
 	cube->ennemies[cube->nb_ennemy] = '\0';
 	while (cube->map[i])

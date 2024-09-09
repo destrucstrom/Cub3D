@@ -41,6 +41,7 @@ int	the_end(t_cube *cube)
 	mlx_loop_end(cube->mlx_ptr);
 	free(cube->mlx_ptr);
 	free(cube->ennemies);
+	pthread_mutex_destroy(&cube->mutex_enemies);
 	exit(0);
 }
 

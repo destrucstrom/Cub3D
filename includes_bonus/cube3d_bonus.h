@@ -164,6 +164,7 @@ typedef struct s_cube
 	int		size_mini;
 	int		act_doors_state;
 	int		nb_ennemy;
+	pthread_mutex_t mutex_enemies;
 	t_enm	**ennemies;
 	t_data	assets_ennemies[1];
 	t_obj	*rayc_obj;
